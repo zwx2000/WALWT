@@ -1,32 +1,34 @@
-
 #include <stdio.h>
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
 #include <stdlib.h>
-
+//方向键的ASCLL值:上72，左75，右77，下80
+//背景颜色的代码： 0=黑色  1蓝色 2 绿色 3湖蓝色 4红色 5紫色 6黄色 7白色 8灰色 9淡蓝色 
+//**改变当前光标方块的背景颜色和字体颜色**//
 void BackGround(unsigned int ForeColor = 7, unsigned int BackGroundColor = 0) {
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);  
-	SetConsoleTextAttribute(handle, ForeColor + BackGroundColor * 0x10);
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);  //获取控制台的句柄
+	SetConsoleTextAttribute(handle, ForeColor + BackGroundColor * 0x10);//改变当前光标的背景和字体颜色
 }
  
 
 void gotoxy(int x, int y) {
 	HANDLE handle;
-	COORD coord;  
+	COORD coord;   
 	coord.X = x;
 	coord.Y = y;
 	handle = GetStdHandle(STD_OUTPUT_HANDLE);  
-	SetConsoleCursorPosition(handle, coord); 
+	SetConsoleCursorPosition(handle, coord);  
 }
  
+/**初始化地图数据**/
 void restart(int bk[20][20], int look[4], int move[20][20]) {
-	int pp, qq; 
+	int pp, qq;  
 	for(int i=0;i<=16;i++)
 		for (int j = 0; j <= 16; j++) {
 			if (i == 0 || i == 16 || j == 0 || j == 16)  bk[i][j] = 1;
 			else bk[i][j] = 0; 
-			move[i][j] = 0;   
+			move[i][j] = 0;    
 		}
 	bk[8][8] = 3;
 	move[8][8] = 1;
@@ -49,7 +51,6 @@ void restart(int bk[20][20], int look[4], int move[20][20]) {
 				BackGround(0, 1);
 				break;
 			case 2:
-				BackGround(0, 2);
 				break;
 			case 3:
 				BackGround(0, 3);
@@ -59,11 +60,10 @@ void restart(int bk[20][20], int look[4], int move[20][20]) {
 			}
 			printf("  ");
 		}
-	gotoxy(35, 0);
-	BackGround(7, 0);
 }
- 
+ //**运动主体**//
 void map(int bk[20][20], int look[4], int xy[2], int move[20][20]) {
+	//bk是地图信息，look作数据记录，xy记录坐标，move记录蛇的运动轨迹
 	int b[10], qq=0, pp=0;
 	if (kbhit()) {
 		b[0] = getch();
@@ -78,27 +78,28 @@ void map(int bk[20][20], int look[4], int xy[2], int move[20][20]) {
 			look[0] = 4;
 	}
 	switch (look[0]) {
-	case 1:
+	case 1://往上走
 		xy[1]--;
 		break;
-	case 2:
+	case 2://往下走
 		xy[1]++;
 		break;
-	case 3:
+	case 3://往左走
 		xy[0]--;
 		break;
-	case 4:
+	case 4://往右走
 		xy[0]++;
 		break;
 	}
-	move[0][0]++;
-	move[xy[0]][xy[1]] = move[0][0];
+	move[0][0]++;//蛇的步数加一
+	move[xy[0]][xy[1]] = move[0][0];//记录当前格子中蛇的轨迹
 	gotoxy(35, 2);
 	BackGround(7, 0);
-	gotoxy(xy[0] * 2, xy[1]);
+	gotoxy(xy[0] * 2, xy[1]);//这里蛇头就往前移动了
 	BackGround(0, 3);
 	printf("  ");
  
+ //如果吃了果实//
 	if (bk[xy[0]][xy[1]] == 2) {
 		look[2]++;
 		look[1]++;
@@ -114,6 +115,7 @@ void map(int bk[20][20], int look[4], int xy[2], int move[20][20]) {
 		printf("  ");
 	}
  
+ //如果撞了墙或者自己//
 	if (bk[xy[0]][xy[1]] == 1 || bk[xy[0]][xy[1]] == 3) {
 		look[3] = 1;
 		gotoxy(6, 6);
